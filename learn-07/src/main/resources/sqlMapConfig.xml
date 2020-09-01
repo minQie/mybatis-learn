@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+  <properties resource="db.properties"/>
+
+  <settings>
+    <setting name="logImpl" value="LOG4J2"/>
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+  </settings>
+
+  <typeAliases>
+    <package name="priv.wmc.pojo"/>
+    <package name="priv.wmc.basic.enums"/>
+  </typeAliases>
+
+  <typeHandlers>
+    <package name="priv.wmc.handler"/>
+  </typeHandlers>
+
+  <plugins>
+    <!-- 注入自定义插件，更新时相关实体时，如果实体有 gmtModified字段就自动更新该值 -->
+    <plugin interceptor="priv.wmc.interceptor.UpdateSetGmtModifiedInterceptor"/>
+    <!-- 注入Mybatis的分页插件 - PageHelper -->
+    <plugin interceptor="com.github.pagehelper.PageInterceptor">
+      <property name="supportMethodsArguments" value="true"/>
+    </plugin>
+  </plugins>
+
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC" />
+      <dataSource type="POOLED">
+        <property name="driver" value="${jdbc.driverClass}" />
+        <property name="url" value="${jdbc.jdbcUrl}" />
+        <property name="username" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.password}" />
+      </dataSource>
+    </environment>
+  </environments>
+
+  <mappers>
+    <mapper resource="mapper/UserMapper.xml" />
+  </mappers>
+</configuration>

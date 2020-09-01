@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="priv.wmc.mapper.UserMapper">
+
+  <!--
+    id: 唯一标识，某个select的resultMap就通过该id引用
+    type: 实体类完整类名（这里sqlMapConfig.xml中配置了别名）
+
+    注意: resultMap子标签的column属性不是实际数据表的字段名, 而是要和被使用的select标签下select字段AS后边的名称对应,
+     只是select的字段不写AS, 默认就是实际数据表的字段名
+   -->
+  <resultMap id="userResult" type="UserResult">
+    <!-- 和hibernate一样，属性名和数据库字段名相同的可以不用写 -->
+    <id     property="id"       column="id"        javaType="Long"    jdbcType="BIGINT"/>
+    <result property="username" column="username"  javaType="String"  jdbcType="VARCHAR"/>
+    <result property="gender"   column="gender"    javaType="GenderEnum"  jdbcType="TINYINT"/>
+    <result property="birthday" column="birthday"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+    <result property="address"  column="address"   javaType="String"  jdbcType="VARCHAR"/>
+    <result property="gmtCreate" column="gmt_create"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+    <result property="gmtModified" column="gmt_modified"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+  </resultMap>
+
+  <resultMap id="userResult2" type="UserResult">
+    <!-- 实际在报错，参照源码ResultMap.argNamesOfMatchingConstructor，
+    比较构造函数是否匹配，看的是下面定义的name和构造函数的形参变量名是否匹配，而实际变量名是：arg0、...、arg6，不匹配
+
+     解决办法：
+     方式一、下面不指定name属性，保证下面字段的排序和构造形参的顺序对应（因为实际除了变量匹配检查，还有类型匹配检查）
+     方式二、可以添加 @Param 注解（这里采用这种解决方案）
+     方式三、使用 '-parameters' 编译选项并启用 useActualParamName 选项（默认开启）来编译项目
+     （官网的说法是：当你在处理一个带有多个形参的构造方法时，很容易搞乱 arg 元素的顺序。 从版本 3.4.3 开始，可以在指定参数名称的前提下，以任意顺序编写 arg 元素）
+     -->
+    <constructor>
+      <idArg  name="id"    column="id"       javaType="long"/>
+      <arg name="username" column="username" javaType="string"/>
+      <arg name="gender"   column="gender"   javaType="genderEnum" />
+      <arg name="birthday" column="birthday" javaType="java.time.LocalDateTime" />
+      <arg name="address"  column="address"  javaType="string" />
+      <arg name="gmtCreate"  column="gmt_create" javaType="java.time.LocalDateTime" />
+      <arg name="gmtModified"  column="gmt_modified" javaType="java.time.LocalDateTime" />
+    </constructor>
+  </resultMap>
+
+  <select id="findById" parameterType="java.lang.Long" resultMap="userResult">
+    SELECT *
+    FROM `user`
+    WHERE id = #{id}
+  </select>
+
+  <select id="findById2" parameterType="long" resultMap="userResult2">
+    SELECT *
+    FROM `user`
+    WHERE id = #{id}
+  </select>
+
+  <!-- 虽然 _int 爆红，但是运行是没有问题的 -->
+  <select id="selectInteger" resultType="_int">
+    SELECT 1;
+  </select>
+
+  <select id="findMapById" resultType="map">
+    SELECT *
+    FROM `user`
+    WHERE id = #{id}
+  </select>
+
+</mapper>

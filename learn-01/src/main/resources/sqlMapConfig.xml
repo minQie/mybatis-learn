@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+  <settings>
+    <!-- 开启下划线命名到驼峰命名法的自动转换（mybatis结果集处理层面） -->
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+  </settings>
+
+  <!-- 将自定义枚举处理器注册到mybatis中 -->
+  <typeHandlers>
+<!--    <typeHandler handler="priv.wmc.handler.EnumHandler"/>-->
+    <package name="priv.wmc.handler"/>
+  </typeHandlers>
+
+  <!-- 和spring整合后，environment标签会被废除 -->
+  <environments default="development">
+    <environment id="development">
+      <!-- 使用jdbc事务管理 -->
+      <transactionManager type="JDBC" />
+      <!-- 数据库连接池 -->
+      <dataSource type="POOLED">
+        <property name="driver" value="com.mysql.cj.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:8090/mybatis?characterEncoding=utf8&amp;serverTimezone=CTT" />
+        <property name="username" value="root" />
+        <property name="password" value="123" />
+      </dataSource>
+    </environment>
+  </environments>
+
+  <!-- 配置Mapper的位置，就像hibernate告诉主配置文件元数据的位置 -->
+  <mappers>
+    <!-- 对Mapper.java和Mapper.xml的路径和命名没有要求 -->
+    <mapper resource="mapper/UserMapper.xml" />
+    <!-- 下面两种对Mapper.java和Mapper.xml的路径和命名都有要求 -->
+<!--    <mapper class="priv.wmc.pojo.entity.User" />-->
+<!--    <package name="priv.wmc.pojo.entity" />-->
+  </mappers>
+</configuration>

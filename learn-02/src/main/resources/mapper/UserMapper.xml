@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test">
+
+  <!-- 一、通过id查询用户 -->
+  <select id="findById" parameterType="java.lang.Long" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM `user`
+    WHERE id = #{id}
+  </select>
+
+  <!-- 二、通过用户名模糊查询用户列表 -->
+  <select id="listByUsernameLike" parameterType="java.lang.String" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM `user`
+    WHERE username LIKE CONCAT('%', #{username}, '%')
+  </select>
+
+  <!-- 添加用户 -->
+  <insert id="save" parameterType="priv.wmc.pojo.entity.User" useGeneratedKeys="true" keyProperty="id">
+    <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO `user`(username, gender, birthday, address)
+    VALUES(#{username}, #{gender}, #{birthday}, #{address})
+  </insert>
+
+  <!-- 修改用户（到了动态sql模块，更新语句会合理优化） -->
+  <update id="update" parameterType="priv.wmc.pojo.entity.User">
+    UPDATE `user`
+    SET username = #{username},
+        birthday = #{birthday},
+        gender   = #{gender},
+        address  = #{address},
+        gmt_modified = #{gmtModified}
+    WHERE id = #{id}
+  </update>
+
+  <!-- 删除 -->
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE
+    FROM `user`
+    WHERE id = #{id}
+  </delete>
+</mapper>

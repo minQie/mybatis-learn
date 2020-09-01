@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="priv.wmc.mapper.UserMapper">
+
+  <resultMap id="userResult" type="UserResult">
+    <id     property="id"       column="id"        javaType="Long"    jdbcType="BIGINT"/>
+    <result property="username" column="username"  javaType="String"  jdbcType="VARCHAR"/>
+    <result property="gender"   column="gender"    javaType="GenderEnum"  jdbcType="TINYINT"/>
+    <result property="birthday" column="birthday"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+    <result property="address"  column="address"   javaType="String"  jdbcType="VARCHAR"/>
+    <result property="gmtCreate" column="gmt_create"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+    <result property="gmtModified" column="gmt_modified"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+  </resultMap>
+
+  <!-- SQL 片段定义 -->
+  <sql id="SELECTOR">
+    SELECT *
+    FROM `user`
+  </sql>
+
+  <!-- FOREACH标签: 参数：Long[] -->
+  <select id="listByIdArray" parameterType="java.lang.Long" resultMap="userResult">
+    <!-- SQL 片段引用 -->
+    <include refid="SELECTOR"/>
+    <where>
+      id in
+      <!-- mybatis并不支持 id in #{ids} 这样的结合参数传参的形式
+          FOREACH标签: 动态 SQL 的另一个常见使用场景是对集合进行遍历（尤其是在构建 IN 条件语句的时候）
+
+          collection：遍历的集合，这里是QueryVo的ids属性
+          item：遍历的项目，可以随便写，但是和后面的#{}里面要一致
+          open：在前面添加的sql片段
+          close：在结尾处添加的sql片段
+          separator：指定遍历的元素之间使用的分隔符
+
+          当使用可迭代对象或者数组时
+                index 是当前迭代的序号，item 的值是本次迭代获取到的元素
+          当使用 Map 对象（或者 Map.Entry 对象的集合）时
+                index 是键，item 是值
+       -->
+      <foreach collection="array" item="xxx" open="(" separator="," close=")">
+        #{xxx}
+      </foreach>
+    </where>
+  </select>
+
+  <!-- FOREACH标签: 参数：List<Long> -->
+  <select id="listByIdList" parameterType="java.lang.Long" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <where>
+      id in
+      <foreach collection="list" item="xxx" open="(" separator="," close=")">
+        #{xxx}
+      </foreach>
+    </where>
+  </select>
+
+  <!-- IF标签: user.username 的 user 不是随意输入的，而是 UserQueryVo 中的属性 -->
+  <select id="listByQueryVo" parameterType="UserQueryVo" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    WHERE 1=1
+
+    <if test="user.gender != null and user.gender != ''">
+      AND gender = #{user.gender}
+    </if>
+
+    <if test="user.username != null and user.username != ''">
+      AND username LIKE "%"#{user.username}"%"
+    </if>
+
+    <if test="idList != null and idList != ''">
+      AND id in
+      <foreach collection="idList" item="xxx" open="(" separator="," close=")">
+        #{xxx}
+      </foreach>
+    </if>
+
+    <if test="idArray != null and idArray != ''">
+      AND id in
+      <foreach collection="idArray" item="xxx" open="(" separator="," close=")">
+        #{xxx}
+      </foreach>
+    </if>
+  </select>
+
+  <!-- 下面三个查询是为了演示复杂查询参数的例子 -->
+  <select id="listByUsernameLikeAndGender" resultMap="userResult">
+    SELECT *
+    FROM `user`
+    <where>
+      AND username LIKE CONCAT('%', #{param1}, '%')
+      AND gender = #{param2}
+    </where>
+  </select>
+
+  <select id="listByUser1UsernameAndUser2Gender" resultMap="userResult">
+    SELECT *
+    FROM `user`
+    <where>
+      AND username = #{param1.username}
+      AND gender = #{param2.gender}
+    </where>
+  </select>
+
+  <select id="listByMap1UsernameAndMap2Gender" resultMap="userResult">
+    SELECT *
+    FROM `user`
+    <where>
+      AND username = #{param1.username}
+      AND gender = #{param2.gender}
+    </where>
+  </select>
+
+  <!-- WHERE标签: 为了满足MySQL的语法，where 1=1，这样的写法很傻吊 -->
+  <select id="whereDemo" parameterType="User" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <!-- where标签会去掉第一个and，来保证SQL语法正确 -->
+    <where>
+      <if test="gender != null and gender != ''">
+        AND gender = #{gender}
+      </if>
+      <if test="username != null and username != '' ">
+        AND username LIKE "%"#{username}"%"
+      </if>
+    </where>
+  </select>
+
+  <!-- CHOOSE, WHEN, OTHERWISE 标签: 众多条件只取一个, 同java语法的switch -->
+  <select id="chooseDemo" parameterType="User" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <choose>
+      <when test="gender != null and gender != ''">
+        AND gender = #{gender}
+      </when>
+      <when test="username != null and username != '' ">
+        AND username LIKE "%"#{username}"%"
+      </when>
+      <otherwise>
+        AND username = '小明'
+      </otherwise>
+    </choose>
+  </select>
+
+  <!-- TRIM标签:
+          where 元素只会在子元素返回任何内容的情况下才插入 “WHERE” 子句。而且，若子句的开头为 “AND” 或 “OR”，where 元素也会将它们去除。
+          如果 where 元素与你期望的不太一样，你也可以通过自定义 trim 元素来定制 where 元素的功能。比如，和 where 元素等价的自定义 trim 元素为
+
+          等效where <trim prefix="where" prefixOverrides="AND |OR">
+          等效update <trim prefix="SET" suffixOverrides=",">
+          prefix
+            当 trim 元素包含有内容时， 增加 prefix 所指定的前缀
+          prefixOverrides
+            当 trim 元素包含有内容时， 去除 prefixOverrides 指定的 前缀
+          suffix
+            当 trim 元素包含有内容时， 增加 suffix 所指定的后缀
+          suffixOverrides
+            当 trim 元素包含有内容时， 去除 suffixOverrides 指定的后缀
+   -->
+  <select id="trimDemo" parameterType="User" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <!--
+        prefixOverrides 属性会忽略通过管道符分隔的文本序列（注意此例中的空格是必要的）
+        上述例子会移除所有 prefixOverrides 属性中指定的内容，并且插入 prefix 属性中指定的内容
+     -->
+    <trim prefix="WHERE" prefixOverrides="AND |OR ">
+      <if test="gender != null and gender != ''">
+        AND gender = #{gender}
+      </if>
+      <if test="username != null and username != '' ">
+        OR username LIKE "%"#{username}"%"
+      </if>
+    </trim>
+  </select>
+
+  <!-- SET标签: 动态更新的解决方法，见对应的Mapper.java -->
+
+  <!-- BIND标签: bind 元素允许你在 OGNL 表达式以外创建一个变量，并将其绑定到当前的上下文 -->
+  <select id="listByUsernameLike" parameterType="User" resultMap="userResult">
+    <bind name="username_like" value="'%' + param1 + '%'" />
+    SELECT * FROM `user`
+    WHERE username LIKE #{username_like}
+  </select>
+
+</mapper>

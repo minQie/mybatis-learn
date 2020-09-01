@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    最初的错误理解
+    像下面连接查询的sql语句执行返回的数据,是像下面这样的多条记录的(使用json串,更形象的描述出来):
+    [
+      {
+        "a_xxx1": "1",
+        "a_xxx2": "1",
+        "b_xxx1": "1",
+        "b_xxx2": "1"
+      },
+      {
+        "a_xxx1": "1",
+        "a_xxx2": "1",
+        "b_xxx1": "2",
+        "b_xxx2": "2"
+      },
+      ...
+    ]
+    而mybatis并不支持将上面那样多条记录封装成如下的结构的:
+    {
+      "a_xxx1": "1",
+      "a_xxx2": "1",
+      "bList": [
+        {
+          "b_xxx1": "1",
+          "b_xxx2": "1"
+        },
+        {
+          "b_xxx1": "2",
+          "b_xxx2": "2"
+        },
+        ...
+      ]
+    }
+    实际是因为：
+    <result property="id"       column="id"  />
+    而使用的select标签下边的查询语句是这样的：
+    SELECT id AS user_id
+ -->
+<mapper namespace="priv.wmc.mapper.UserMapper">
+
+  <!-- 用户 -->
+  <resultMap id="UserRelateResult" type="UserRelateResult">
+    <!-- 使用id标签或者result标签都行吗，就像上面的结论，不能写错就行 -->
+    <id property="id"           column="user_id" />
+    <result property="username" column="username"/>
+    <result property="gender"   column="gender"  />
+    <result property="birthday" column="birthday"/>
+    <result property="address"  column="address" />
+    <!-- 注意：需要区分开 user 和 order 的 gmt_create 和 gmt_modified -->
+    <result property="gmtCreate"  column="u_gmt_create" />
+    <result property="gmtModified"  column="u_gmt_modified" />
+    <!-- 关联订单: 一对多
+         注意泛型的类型时通过 ofType 属性指定的
+     -->
+    <collection property="orders" javaType="java.util.ArrayList" ofType="OrderResult">
+      <!-- 下面这些属性当然也是可以定义在resultMap中，然后collection标签指定resultMap属性 -->
+      <id     property="id"         column="order_id"/>
+      <result property="code"       column="code"    />
+      <result property="money"      column="money"   />
+      <result property="gmtCreate"  column="o_gmt_create" />
+      <result property="gmtModified"  column="o_gmt_modified" />
+    </collection>
+  </resultMap>
+
+  <select id="findById" parameterType="java.lang.Long" resultMap="UserRelateResult">
+    SELECT
+      u.id AS user_id,
+      u.username,
+      u.gender,
+      u.birthday,
+      u.address,
+      u.gmt_create AS u_gmt_create,
+      u.gmt_modified AS u_gmt_modified,
+
+      o.id AS order_id,
+      o.code,
+      o.money,
+      o.gmt_create AS o_gmt_create,
+      o.gmt_modified AS o_gmt_modified
+    FROM
+      `user` u LEFT JOIN `order` o
+    ON
+      u.id = o.user_id
+    WHERE
+      u.id = #{userId}
+  </select>
+
+</mapper>

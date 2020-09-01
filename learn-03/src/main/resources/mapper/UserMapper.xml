@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 需要和Mapper接口类的完整类名对应上 -->
+<mapper namespace="priv.wmc.mapper.UserMapper">
+
+  <select id="findById" parameterType="java.lang.Long" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM user
+    WHERE id = #{id}
+  </select>
+
+  <select id="listByUsernameLike" parameterType="java.lang.String" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM user
+    WHERE username LIKE "%"#{username}"%"
+  </select>
+
+  <insert id="save" parameterType="priv.wmc.pojo.entity.User">
+    <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+      select LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO `user`(username, gender, birthday, address)
+    VALUES(#{username}, #{gender}, #{birthday}, #{address})
+  </insert>
+
+  <update id="update" parameterType="priv.wmc.pojo.entity.User">
+    UPDATE user
+    SET username = #{username},
+        birthday = #{birthday},
+        gender   = #{gender},
+        address  = #{address},
+        gmt_modified = #{gmtModified}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE
+    FROM user
+    WHERE id = #{id}
+  </delete>
+
+  <select id="selectNumberTest" resultType="java.util.Map">
+    SELECT floor('5.000') AS num
+  </select>
+</mapper>

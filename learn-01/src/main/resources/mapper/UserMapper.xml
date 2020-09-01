@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace：用于区分不同Mapper配置下相同id的sql语句 -->
+<mapper namespace="test">
+  <!--
+    通过id来执行sql语句
+    通过paramterType来指定参数类型
+    通过resultTye来自动映射指定查询的返回值类型
+    使用#{xxx}的形式来设置占位符
+   -->
+  <!-- 一、通过id查询用户 -->
+  <select id="findById" parameterType="java.lang.Long" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM `user`
+    WHERE id = #{id}
+  </select>
+
+  <!--
+    #{}占位符会填入实际数据的时候在左右两边各加一个单引号
+    ${}则不会，并且大括号中只能填value
+   -->
+  <!-- 二、通过用户名模糊查询用户列表 -->
+  <!--
+    sql注入风险
+        '%${value}%'
+        "%"'${value}'"%"
+    无sql注入风险
+        代码层面拼接%
+          1、直接拼接
+        Mapper.xml层面拼接
+          1、使用bind标签 - 将参数内容直接作为String类型的参数
+          2、"%"#{username}"%"（双引号不能换成单引号）（狂神视频说这个是由sql注入风险的）
+          3、concat('%', #{username}, '%')
+     注意：username如果传的是空串，那么查的就是所有数据了
+   -->
+  <select id="listByUsernameLike" parameterType="java.lang.String" resultType="priv.wmc.pojo.result.UserResult">
+    SELECT *
+    FROM `user`
+    WHERE username LIKE CONCAT('%', #{username}, '%')
+  </select>
+
+  <!-- 添加用户 -->
+  <insert id="save" parameterType="priv.wmc.pojo.entity.User" useGeneratedKeys="true" keyProperty="id">
+    <!-- 下面的是原生sql语句，放在insert下边，用于指定返回数据
+      keyProperty 和实体的id属性名对应
+      resultType 实体属性的类型
+      order
+        AFTER mysql、主键类型是Integer
+        BEFORE oracle中先生成uuid，再和数据一起保存到数据库时
+     -->
+    <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO `user`(username, gender, birthday, address)
+    VALUES(#{username}, #{gender}, #{birthday}, #{address})
+  </insert>
+
+  <!-- id字段即使主动设置为null也没有问题，但是其他不能为空的字段（即使设置了默认值）设置了null值，就会凉凉，本例中就是创建时间 -->
+<!--  <insert id="saveError" parameterType="priv.wmc.pojo.entity.User">-->
+<!--    <selectKey keyProperty="id" resultType="Long" order="AFTER">-->
+<!--      SELECT LAST_INSERT_ID()-->
+<!--    </selectKey>-->
+<!--    INSERT INTO `user` VALUES(null, #{username}, #{gender}, #{birthday}, #{address}, null, null)-->
+<!--  </insert>-->
+
+  <!-- 修改用户（到了动态sql模块，更新语句会合理优化） -->
+  <update id="update" parameterType="priv.wmc.pojo.entity.User">
+    UPDATE `user`
+    SET username = #{username},
+        birthday = #{birthday},
+        gender   = #{gender},
+        address  = #{address},
+        gmt_modified = #{gmtModified}
+    WHERE id = #{id}
+  </update>
+
+  <!-- 删除 -->
+  <delete id="deleteById" parameterType="java.lang.Long">
+    DELETE
+    FROM `user`
+    WHERE id = #{id}
+  </delete>
+</mapper>
