@@ -36,11 +36,11 @@
           separator：指定遍历的元素之间使用的分隔符
 
           当使用可迭代对象或者数组时
-                index 是当前迭代的序号，item 的值是本次迭代获取到的元素
+                index 是当前迭代的序号（从 0 开始），item 的值是本次迭代获取到的元素
           当使用 Map 对象（或者 Map.Entry 对象的集合）时
                 index 是键，item 是值
        -->
-      <foreach collection="array" item="xxx" open="(" separator="," close=")">
+      <foreach collection="array" index="index" item="xxx" open="(" separator="," close=")">
         #{xxx}
       </foreach>
     </where>
@@ -53,6 +53,32 @@
       id in
       <foreach collection="list" item="xxx" open="(" separator="," close=")">
         #{xxx}
+      </foreach>
+    </where>
+  </select>
+
+  <select id="listByIdArrayMap" parameterType="java.util.Map" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <where>
+      id in
+      <foreach collection="idArray" item="xxx" open="(" separator="," close=")">
+        #{xxx}
+      </foreach>
+    </where>
+  </select>
+
+  <select id="listByIdMap" parameterType="map" resultMap="userResult">
+    <include refid="SELECTOR"/>
+    <where>
+      id in
+      <!--
+      当前参数如果是一个Map类型，在Mapper接口方法的Map形参前面不加@Param，是取不到值的（好蠢）
+      1.map.keys、map.keySet() 能够取到并遍历 map 的 keySet()，index：元素下标，item：值
+      2.map.values 能够取到并遍历 map 的 valueSet()，index：元素下标，item：值
+      3.map.entrySet()，index：键，item：值
+       -->
+      <foreach collection="map.keys" item="key" open="(" separator="," close=")">
+        #{key}
       </foreach>
     </where>
   </select>

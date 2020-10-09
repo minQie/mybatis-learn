@@ -2,10 +2,10 @@ package priv.wmc.mapper;
 
 import java.util.List;
 import java.util.Map;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import priv.wmc.pojo.entity.User;
 import priv.wmc.pojo.param.UserQueryVo;
-import priv.wmc.pojo.result.OrderResult;
 import priv.wmc.pojo.result.UserResult;
 
 /**
@@ -23,9 +23,13 @@ public interface UserMapper {
      * 所以，假如 Mapper.java 的接口方法定义的返回值类型错了，赋值是通过反射赋值的，赋值成功没有问题（java的泛型，呵呵...），
      * 但是通过ArrayList.get方法取值时的类型转换，就等着ClassCastException咯
      */
-    List<OrderResult> listByIdArray(Long[] idArray);
+    List<UserResult> listByIdArray(Long[] idArray);
 
     List<UserResult> listByIdList(List<Long> idList);
+
+    List<UserResult> listByIdArrayMap(Map<String, Long[]> map);
+
+    List<UserResult> listByIdMap(@Param("map") Map<String, Long> map);
 
     List<UserResult> listByQueryVo(UserQueryVo userQueryVo);
 

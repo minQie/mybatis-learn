@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -14,7 +16,6 @@ import org.junit.Test;
 import priv.wmc.mapper.UserMapper;
 import priv.wmc.pojo.entity.User;
 import priv.wmc.pojo.param.UserQueryVo;
-import priv.wmc.pojo.result.OrderResult;
 import priv.wmc.pojo.result.UserResult;
 
 /**
@@ -49,10 +50,22 @@ public class DynamicSqlAndQueryVoTest {
             // List<Long> idList = Arrays.asList(idArray);
 
             // id数组查询条件
-            List<OrderResult> userList1 = userMapper.listByIdArray(idArray);
+            List<UserResult> userList1 = userMapper.listByIdArray(idArray);
 
             // id列表查询条件
             List<UserResult> userList2 = userMapper.listByIdList(idList);
+
+            // 放在 map 里边的id数组查询条件
+            Map<String, Long[]> map = new HashMap<>(2);
+            map.put("idArray", idArray);
+            List<UserResult> userList3 = userMapper.listByIdArrayMap(map);
+
+            // 放在 map 里边的id查询条件
+            Map<String, Long> map2 = new HashMap<>(5);
+            map2.put("id1", 1L);
+            map2.put("id2", 2L);
+            map2.put("id3", 3L);
+            List<UserResult> userList4 = userMapper.listByIdMap(map2);
 
             // 集成查询条件
             UserQueryVo queryVo = new UserQueryVo();
@@ -60,7 +73,7 @@ public class DynamicSqlAndQueryVoTest {
             queryVo.setIdList(idList);
             queryVo.setIdArray(idArray);
 
-            List<UserResult> userList3 = userMapper.listByQueryVo(queryVo);
+            List<UserResult> userList5 = userMapper.listByQueryVo(queryVo);
 
             // 更新
             User user = User.builder()
