@@ -6,44 +6,39 @@
 
   <!-- 订单 -->
   <resultMap id="OrderRelateResult" type="OrderRelateResult">
-    <id     property="id"         column="order_id"/>
-    <result property="code"       column="code"/>
-    <result property="money"      column="money"/>
+    <id property="id" column="order_id"/>
+    <result property="code" column="code"/>
+    <result property="money" column="money"/>
     <result property="gmtCreate" column="o_gmt_create"/>
     <result property="gmtModified" column="o_gmt_modified"/>
     <!-- 关联用户: 多对一 -->
     <association property="user" javaType="UserResult">
-      <id     property="id"       column="user_id"       />
-      <result property="username" column="username" />
-      <result property="gender"   column="gender"   />
-      <result property="birthday" column="birthday" />
-      <result property="address"  column="address"  />
+      <id property="id" column="user_id"/>
+      <result property="username" column="username"/>
+      <result property="gender" column="gender"/>
+      <result property="birthday" column="birthday"/>
+      <result property="address" column="address"/>
       <result property="gmtCreate" column="u_gmt_create"/>
       <result property="gmtModified" column="u_gmt_modified"/>
     </association>
   </resultMap>
 
   <select id="listByUserId" parameterType="java.lang.Long" resultMap="OrderRelateResult">
-    SELECT
-        o.id AS order_id,
-        o.code,
-        o.money,
-        o.gmt_create AS o_gmt_create,
-        o.gmt_modified AS o_gmt_create,
-
-        u.id AS user_id,
-        u.username AS username,
-        u.gender AS gender,
-        u.birthday AS birthday,
-        u.address AS address,
-        u.gmt_create AS u_gmt_create,
-        u.gmt_modified AS u_gmt_create
-    FROM
-      `order` o LEFT JOIN `user` u
-    ON
-      o.user_id = u.id
-    WHERE
-      u.id = #{userId}
+    SELECT o.id           AS order_id,
+           o.code,
+           o.money,
+           o.gmt_create   AS o_gmt_create,
+           o.gmt_modified AS o_gmt_create,
+           u.id           AS user_id,
+           u.username     AS username,
+           u.gender       AS gender,
+           u.birthday     AS birthday,
+           u.address      AS address,
+           u.gmt_create   AS u_gmt_create,
+           u.gmt_modified AS u_gmt_create
+    FROM `order` o
+           LEFT JOIN `user` u ON o.user_id = u.id
+    WHERE u.id = #{userId}
   </select>
 
 </mapper>

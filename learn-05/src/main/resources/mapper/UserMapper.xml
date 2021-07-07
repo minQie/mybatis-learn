@@ -5,13 +5,13 @@
 <mapper namespace="priv.wmc.mapper.UserMapper">
 
   <resultMap id="userResult" type="UserResult">
-    <id     property="id"       column="id"        javaType="Long"    jdbcType="BIGINT"/>
-    <result property="username" column="username"  javaType="String"  jdbcType="VARCHAR"/>
-    <result property="gender"   column="gender"    javaType="GenderEnum"  jdbcType="TINYINT"/>
-    <result property="birthday" column="birthday"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
-    <result property="address"  column="address"   javaType="String"  jdbcType="VARCHAR"/>
-    <result property="gmtCreate" column="gmt_create"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
-    <result property="gmtModified" column="gmt_modified"  javaType="java.time.LocalDateTime"    jdbcType="DATE"/>
+    <id     property="id"          column="id"           javaType="Long"                    jdbcType="BIGINT"/>
+    <result property="username"    column="username"     javaType="String"                  jdbcType="VARCHAR"/>
+    <result property="gender"      column="gender"       javaType="GenderEnum"              jdbcType="TINYINT"/>
+    <result property="birthday"    column="birthday"     javaType="java.time.LocalDateTime" jdbcType="DATE"/>
+    <result property="address"     column="address"      javaType="String"                  jdbcType="VARCHAR"/>
+    <result property="gmtCreate"   column="gmt_create"   javaType="java.time.LocalDateTime" jdbcType="DATE"/>
+    <result property="gmtModified" column="gmt_modified" javaType="java.time.LocalDateTime" jdbcType="DATE"/>
   </resultMap>
 
   <!-- SQL 片段定义 -->
